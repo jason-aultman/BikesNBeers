@@ -87,7 +87,7 @@ namespace BikesNBeersMVC.Services
                     foreach (var brewery in result.Results)
                     {
                         if (brewery.Photos != null && brewery.Photos.Count > 0)
-                            brewery.photoURL = $"https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photoreference={brewery.Photos[0].Photo_Reference}&key=AIzaSyAuKgJKHj3zOAMfx9bGAK8in1s4pYhl0JA";
+                            brewery.photoURL = $"https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photoreference={brewery.Photos[0].Photo_Reference}&key={_settings.ApiKey}";
                     }
                 }
             }
