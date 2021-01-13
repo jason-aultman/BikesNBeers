@@ -236,9 +236,30 @@ namespace BikesNBeersMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+           
             var stop = await _context.Stops.FindAsync(id);
+            var trip = (from t in _context.Trips
+                       where t.Stops.Contains(stop)
+                       select t).Single();
             _context.Stops.Remove(stop);
             await _context.SaveChangesAsync();
+            var tripMiles = this.CalculateTripMiles(trip.Stops).GetAwaiter().GetResult();
+            trip.TripMiles = tripMiles;
+            _context.Trips.Update(trip);
+            var bikerInfo = (from b in _context.BikerInfos
+                             where b.Trips.Contains(trip)
+                             select b).Single();
+            var totalMiles = 0;
+            foreach (Trip t in _context.Trips)
+            {
+                totalMiles += (int)t.TripMiles;
+            }
+            bikerInfo.TotalMiles = totalMiles;
+            _context.Update(bikerInfo);
+
+            await _context.SaveChangesAsync();
+            
+            
             return RedirectToAction(nameof(Index));
         }
 

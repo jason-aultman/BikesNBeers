@@ -46,13 +46,10 @@ namespace BikesNBeersMVC.Controllers
                 StartingLong = coordsStart.results[0].geometry.location.lng,
                 BikerInfoId = bikerInfo.Id
             };
-
             _context.Add(trip);
             await _context.SaveChangesAsync();
 
             welcome.TripId = trip.Id;
-
-           
             return RedirectToAction("SearchForBarOrHotel", "Stops", welcome);
         }
 
@@ -71,12 +68,8 @@ namespace BikesNBeersMVC.Controllers
         //    //    stops = await _stopHandler.GetStopByAddress(requestViewModel.AddressStart, maxMiles, "hotel");
         //    //    stops.Select(stop => stop.TripId = requestViewModel.TripId).ToList();
         //    //}
-
-
         //    return View(stops);
         //}
-
-
         // GET: Trip/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -175,7 +168,6 @@ namespace BikesNBeersMVC.Controllers
                         throw;
                     }
                 }
-                
                 return RedirectToAction("Index", "UserView");
             }
             ViewData["BikerInfoId"] = new SelectList(_context.BikerInfos, "Id", "Id", trip.BikerInfoId);
@@ -207,12 +199,22 @@ namespace BikesNBeersMVC.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var bikerInfo = await _context.BikerInfos.Include(b => b.Trips).Include(b => b.Badges)
-                .FirstOrDefaultAsync(biker => biker.UserId == userId);
             
             var trip = await _context.Trips.FindAsync(id);
-           // bikerInfo.TotalMiles -= (int)trip.TripMiles;  remove 12/27 due to redundancy
             _context.Trips.Remove(trip);
+            
+            await _context.SaveChangesAsync();
+            var bikerInfo = await _context.BikerInfos.Include(b => b.Trips).Include(b => b.Badges)
+    .FirstOrDefaultAsync(biker => biker.UserId == userId);
+
+            var totalMiles = 0;
+            foreach (Trip t in bikerInfo.Trips)
+            {
+                totalMiles += (int)t.TripMiles;
+            }
+            bikerInfo.TotalMiles = totalMiles;
+            
+            _context.Update(bikerInfo);
             await _context.SaveChangesAsync();
             return RedirectToAction("Index", "UserView");
         }

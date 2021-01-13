@@ -75,7 +75,7 @@ namespace BikesNBeersMVC.Controllers
             return View("Index", bikerInfo);
         }
 
-        private async Task<bool> CheckBadges(BikerInfo biker)
+        public async Task<bool> CheckBadges(BikerInfo biker)
         {
             var milesTraveled = biker.TotalMiles;
             var milesTraveledRoundedDownToNearestHundred = Math.Floor((double)milesTraveled / 100) * 100;
